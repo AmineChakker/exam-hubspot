@@ -3,17 +3,19 @@ const express = require("express");
 const axios = require("axios");
 const app = express();
 
+// View engine & middleware
 app.set("view engine", "pug");
 app.use(express.static(__dirname + "/public"));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
+// 🔐 Private App Token (stored in .env, NOT committed)
 const PRIVATE_APP_ACCESS = process.env.PRIVATE_APP_ACCESS;
 
-// Example: pets
+// 🐶 Custom Object name (example: pets)
 const CUSTOM_OBJECT = "pets";
 
-// Common headers
+// Common headers for HubSpot API
 const headers = {
   Authorization: `Bearer ${PRIVATE_APP_ACCESS}`,
   "Content-Type": "application/json",
@@ -21,10 +23,11 @@ const headers = {
 
 /**
  * ROUTE 1
- * Homepage – display custom object records in a table
+ * Homepage – display Pet custom object records
  */
+
 app.get("/", async (req, res) => {
-  const endpoint = `https://api.hubspot.com/crm/v3/objects/${CUSTOM_OBJECT}?properties=name,description,age`;
+  const endpoint = `https://api.hubspot.com/crm/v3/objects/${CUSTOM_OBJECT}?properties=name,type,age`;
 
   try {
     const response = await axios.get(endpoint, { headers });
@@ -42,7 +45,7 @@ app.get("/", async (req, res) => {
 
 /**
  * ROUTE 2
- * Render form to create a new custom object record
+ * Render form to create a new Pet record
  */
 app.get("/update-cobj", (req, res) => {
   res.render("updates", {
@@ -52,13 +55,13 @@ app.get("/update-cobj", (req, res) => {
 
 /**
  * ROUTE 3
- * Handle form submission and create a new custom object record
+ * Handle form submission and create a new Pet record
  */
 app.post("/update-cobj", async (req, res) => {
   const newRecord = {
     properties: {
       name: req.body.name,
-      description: req.body.description,
+      type: req.body.type,
       age: req.body.age,
     },
   };
@@ -74,5 +77,7 @@ app.post("/update-cobj", async (req, res) => {
   }
 });
 
-// 🚀 Server
-app.listen(3000, () => console.log("Listening on http://localhost:3000"));
+// 🚀 Local server
+app.listen(3000, () => {
+  console.log("Listening on http://localhost:3000");
+});
